@@ -1,0 +1,262 @@
+<?php
+
+namespace App\Traits;
+
+use Illuminate\Validation\Rules;
+use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Validator as ValidatorResponse;
+
+trait RequestRulesTrait
+{
+    /**
+     * loginRules
+     *
+     * @return array
+     */
+    public function loginRules(): array
+    {
+        return [
+            'email' => ['required', 'email'],
+            'password' => ['required',  Rules\Password::defaults()],
+        ];
+    }
+
+    /**
+     * registerRules
+     *
+     * @return array
+     */
+    public function registerRules(): array
+    {
+        return [
+            'full_name' => ['required', 'min:2', 'max:20'],
+            'email' => ['required', 'email', Rule::unique('users')],
+            'password' => ['required', Rules\Password::defaults(), 'confirmed'],
+        ];
+    }
+
+    /**
+     * verifyEmailRules
+     *
+     * @return array
+     */
+    public function verifyEmailRules(): array
+    {
+        return [
+            'code' => ['required',  'exists:email_verifications']
+        ];
+    }
+
+    /**
+     * sendPasswordResetCodeRules
+     *
+     * @return array
+     */
+    public function sendPasswordResetCodeRules(): array
+    {
+        return [
+            'email' => ['required', 'email'],
+        ];
+    }
+
+    public function passwordResetRules(): array
+    {
+        return [
+            'email' => ['required', 'email'],
+            'code' => ['required', 'digits:4'],
+            'password' => ['required', Rules\Password::defaults(), 'confirmed'],
+        ];
+    }
+
+     /**
+     * apiValidationHandel
+     *
+     * @param  mixed $request
+     * @param  mixed $rules
+     * @return ValidatorResponse|null
+     */
+    public function apiValidationHandel(Request $request, array $rules): ValidatorResponse|null
+    {
+        // make validation
+        $validator = Validator::make($request->all(), $rules);
+
+        // return validated the data
+        return $validator->fails() ? $validator : null;
+    }
+
+
+    /**
+     * createUserRules
+     *
+     * @return array
+     */
+    public function createUserRules(): array
+    {
+        return [
+            'full_name' => ['required', 'min:2', 'max:20'],
+            'email' => ['required', 'email', Rule::unique('users')],
+            'password' => ['required', Rules\Password::defaults()],
+            'phone' => ['nullable', 'max:40'],
+            'address' => ['nullable', 'max:100'],
+            'image' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'email_verified_at' => ['nullable']
+        ];
+    }
+
+
+     /**
+     * updateUserRules
+     *
+     * @return array
+     */
+    public function updateUserRules(): array
+    {
+        return [
+            'full_name' => ['required', 'min:2', 'max:20'],
+            'email' => ['required', 'email', Rule::unique('users')->ignore($this->user)],
+            'phone' => ['nullable', 'max:40'],
+            'address' => ['nullable', 'max:100'],
+            'image' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'email_verified_at' => ['nullable']
+        ];
+    }
+
+
+    /**
+     * createCityRules
+     *
+     * @return array
+     */
+    public function createCityRules(): array
+    {
+        return [
+            'name' => ['required', 'min:2', 'max:30', Rule::unique('cities')],
+            'country' => ['required', 'min:2', 'max:20'],
+            'description' => ['nullable', 'max:200'],
+            'lat' => ['required', 'min:2'],
+            'lng' => ['required', 'min:2'],
+            'image' => 'required|image|mimes:jpg,png,jpeg|max:2048',
+            'status' => ['nullable'],
+        ];
+    }
+
+    /**
+     * updateCityRules
+     *
+     * @return array
+     */
+    public function updateCityRules(): array
+    {
+        return [
+            'name' => ['required', 'min:2', 'max:30', Rule::unique('cities')->ignore($this->city)],
+            'country' => ['required', 'min:2', 'max:20'],
+            'description' => ['nullable', 'max:200'],
+            'lat' => ['required', 'min:2'],
+            'lng' => ['required', 'min:2'],
+            'image' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'status' => ['nullable'],
+        ];
+    }
+
+    /**
+     * createCityRules
+     *
+     * @return array
+     */
+    public function createEventRules(): array
+    {
+        return [
+            'image'       => 'required|image|mimes:jpg,png,jpeg|max:2048',
+            'price'       => ['required','numeric','min:0'],
+            'title'       => ['required','string','max:255', 'min:3',  Rule::unique('events')],
+            'city_id'     => ['required', 'exists:cities,id'],
+            'venue'       => ['required', 'string', 'max:255'],
+            'organizer'   => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'max:2000', 'min:10'],
+            'start_at'    => ['required', 'date', 'after:now'],
+            'end_at'      => ['required', 'date', 'after_or_equal:start_at'],
+            'lat'         => ['required', 'numeric'],
+            'lng'         => ['required', 'numeric'],
+            'status'      => ['nullable'],
+            'tags'        => ['required', 'array'],
+            'tags.*'      => ['exists:tags,id'],
+        ];
+    }
+
+    /**
+     * updateEventRules
+     *
+     * @return array
+     */
+    public function updateEventRules(): array
+    {
+        return [
+            'image'       => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'price'       => ['required','numeric','min:0'],
+            'title'       => ['required','string','max:255', 'min:3',  Rule::unique('events')->ignore($this->event)],
+            'city_id'     => ['required', 'exists:cities,id'],
+            'venue'       => ['required', 'string', 'max:255'],
+            'organizer'   => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'max:2000', 'min:10'],
+            'start_at'    => ['required', 'date', 'after:now'],
+            'end_at'      => ['required', 'date', 'after_or_equal:start_at'],
+            'lat'         => ['required', 'numeric'],
+            'lng'         => ['required', 'numeric'],
+            'status'      => ['nullable'],
+            'tags'        => ['required', 'array'],
+            'tags.*'      => ['exists:tags,id'],
+        ];
+    }
+
+    public function createHotelRules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'min:2', 'max:100', Rule::unique('hotels')],
+            'cover' => 'required|image|mimes:jpg,png,jpeg|max:4096',
+            'images' => ['nullable', 'array'],
+            'images.*' => 'image|mimes:jpg,png,jpeg|max:4096',
+            'price_per_night' => ['required', 'numeric', 'min:0'],
+            'city_id' => ['required', 'exists:cities,id'],
+            'venue' => ['required', 'string', 'max:255'],
+            'owner' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'lat' => ['required', 'numeric'],
+            'lng' => ['required', 'numeric'],
+            'rate' => ['required', 'integer', 'min:1', 'max:5'],
+            'tags' => ['required', 'array'],
+            'tags.*' => ['exists:tags,id'],
+            'services' => ['required', 'array'],
+            'services.*' => ['exists:services,id'],
+            'status' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /**
+     * updateHotelRules
+     *
+     * @return array
+     */
+    public function updateHotelRules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'min:2', 'max:100', Rule::unique('hotels')->ignore($this->hotel)],
+            'cover' => 'nullable|image|mimes:jpg,png,jpeg|max:4096',
+            'images' => ['nullable', 'array'],
+            'images.*' => 'image|mimes:jpg,png,jpeg|max:4096',
+            'price_per_night' => ['required', 'numeric', 'min:0'],
+            'city_id' => ['required', 'exists:cities,id'],
+            'venue' => ['required', 'string', 'max:255'],
+            'owner' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'lat' => ['required', 'numeric'],
+            'lng' => ['required', 'numeric'],
+            'rate' => ['required', 'integer', 'min:1', 'max:5'],
+            'tags' => ['required', 'array'],
+            'tags.*' => ['exists:tags,id'],
+            'services' => ['required', 'array'],
+            'services.*' => ['exists:services,id'],
+        ];
+    }
+}
