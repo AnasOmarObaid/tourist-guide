@@ -145,7 +145,6 @@ class HotelController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     * Delete the hotel
      */
     public function destroy(Hotel $hotel, ImageService $image)
     {
@@ -172,22 +171,4 @@ class HotelController extends Controller
         }
     }
 
-    // add favorite to hotel
-    public function favorite(Hotel $hotel)
-    {
-        try {
-            $user = FacadesAuth::user();
-            if ($user->favorites()->where('hotel_id', $hotel->id)->exists()) {
-                // If already favorited, remove from favorites
-                $user->favorites()->detach($hotel->id);
-                return $this->successResponse("Hotel removed from favorites", null, 200);
-            } else {
-                // Add to favorites
-                $user->favorites()->attach($hotel->id);
-                return $this->successResponse("Hotel added to favorites", null, 200);
-            }
-        } catch (\Exception $e) {
-            return $this->errorResponse("Something went wrong, please try again later => " . $e->getMessage(), null, 500);
-        }
-    }
 }

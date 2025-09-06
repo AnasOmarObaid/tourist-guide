@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
             $table->date('check_in');
             $table->date('check_out');
-            // $table->decimal('total_price', 10, 2);
+            $table->decimal('total_price', 10, 2);
             $table->enum('status', ['pending','confirmed','canceled'])->default('pending');
             $table->timestamps();
         });

@@ -54,7 +54,7 @@
             </li>
 
             {{-- tickets --}}
-             <li><a class="app-menu__item {{ request()->routeIs('dashboard.ticket.index') ? 'active' : '' }}" href="{{ route('dashboard.ticket.index') }}"><i class="app-menu__icon bi bi-code-square"></i><span
+             <li><a class="app-menu__item {{ request()->routeIs('dashboard.ticket.index') ? 'active' : '' }}" href="{{ route('dashboard.ticket.index') }}"><i class="app-menu__icon bi bi-receipt"></i><span
                               class="app-menu__label">Tickets</span></a></li>
 
             {{-- Hotel routes --}}
@@ -68,6 +68,10 @@
                                     Create Hotel</a></li>
                   </ul>
             </li>
+
+            {{-- bookings --}}
+             <li><a class="app-menu__item {{ request()->routeIs('dashboard.booking.index') ? 'active' : '' }}" href="{{ route('dashboard.booking.index') }}"><i class="app-menu__icon bi bi-bookmark-fill"></i><span
+                              class="app-menu__label">Bookings</span></a></li>
 
             <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i
                               class="app-menu__icon bi bi-file-earmark"></i><span class="app-menu__label">Pages</span><i

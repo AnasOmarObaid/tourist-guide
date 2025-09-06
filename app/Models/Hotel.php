@@ -42,6 +42,7 @@ class Hotel extends Model
     protected $appends = [
         'cover_url',
         'formatted_created_at',
+        'attendees_images'
     ];
 
     /**
@@ -125,6 +126,23 @@ class Hotel extends Model
             'orderable_id',
             'order_id'
         )->where('orders.orderable_type', Hotel::class);
+    }
+
+    /**
+     * getAttendeesImagesAttribute
+     *
+     * @return array
+     */
+    public function getAttendeesImagesAttribute(): array
+    {
+        return $this->bookings()
+            ->with('user')
+            ->get()
+            ->filter(fn($booking) => $booking->user !== null)
+            ->map(fn($booking) => $booking->user->getImagePath())
+            ->unique()
+            ->values()
+            ->toArray();
     }
 
     /**

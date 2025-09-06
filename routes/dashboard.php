@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dashboard\Auth\AdminAuthController;
+use App\Http\Controllers\Dashboard\BookingController;
 use App\Http\Controllers\Dashboard\CityController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\EventController;
@@ -27,12 +28,13 @@ Route::controller(UserController::class)->prefix('user/')->name('user.')->group(
 
 // cities routes
 Route::controller(CityController::class)->prefix('city/')->name('city.')->group(function () {
-    Route::get('/', 'index')->name('index');
-    Route::get('/create', 'create')->name('create');
-    Route::post('/store', 'store')->name('store');
-    Route::get('/{city}/edit', 'edit')->name('edit');
-    Route::put('/{city}', 'update')->name('update');
-    Route::delete('/{city}', 'destroy')->name('destroy');
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/store', 'store')->name('store');
+        Route::get('/{city}/edit', 'edit')->name('edit');
+        Route::get('/{city}', 'show')->name('show');
+        Route::put('/{city}', 'update')->name('update');
+        Route::delete('/{city}', 'destroy')->name('destroy');
 });
 
 // events routes
@@ -58,7 +60,11 @@ Route::controller(HotelController::class)->prefix('hotel/')->name('hotel.')->gro
 // tickets routes
 Route::controller(TicketController::class)->prefix('ticket/')->name('ticket.')->group(function () {
     Route::get('/', 'index')->name('index');
+});
 
+// bookings routes
+Route::controller(BookingController::class)->prefix('booking/')->name('booking.')->group(function (){
+    Route::get('/', 'index')->name('index');
 });
 
 // logout route

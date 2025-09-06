@@ -24,6 +24,7 @@ class BookingFactory extends Factory
             'order_id'    => $order->id,
             'check_in'    => $this->faker->dateTimeBetween('+1 days', '+1 month'),
             'check_out'    => $this->faker->dateTimeBetween('+1 month', '+2 months'),
+            'total_price' => $this->faker->randomFloat(2, 50, 500),
             'status'   => $this->faker->randomElement(['pending','confirmed','canceled']),
         ];
     }

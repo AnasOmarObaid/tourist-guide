@@ -18,13 +18,17 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $events = Event::with(['tags', 'city', 'image', 'tickets.user'])
-            ->latest()
             ->withCount('tickets')
+            ->filter($request)
+            ->latest()
             ->get();
-        return view('dashboard.event.index', compact('events'));
+
+        $tags = Tag::get();
+        $cities = City::get();
+        return view('dashboard.event.index', compact('events', 'tags', 'cities'));
     }
 
     /**

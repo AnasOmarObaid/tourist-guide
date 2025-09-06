@@ -22,7 +22,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                           <a href="{{ route('dashboard.event.create') }}"
                                                 class="btn btn-primary cu-rounded">
-                                                <i class="bi bi-plus"></i>Create Ticket
+                                                <i class="bi bi-plus"></i>Create Event
                                           </a>
                                     </div>
                               </div>
@@ -30,11 +30,60 @@
                   </div>
 
                   <div class="col-12">
+                        <div class="tile cu-rounded border shadow-sm w-100">
+                              <div class="tile-body">
+                                    <div class="filter-card">
+                                          <span id="ticketResultsCount" class="badge bg-light border align-self-center text-success">Showing 0 of 0</span>
+                                          <div class="row g-2 mt-2">
+
+                                                <div class="col-12 col-lg-8">
+                                                      <div class="position-relative">
+                                                            <span class="position-absolute top-50 translate-middle-y ms-3 text-muted"><i class="bi bi-search"></i></span>
+                                                            <input type="text" id="ticketSearch" class="form-control ps-5 rounded-pill" placeholder="Search by event or user..." aria-label="Search tickets">
+                                                      </div>
+                                                </div>
+
+                                                <div class="col-12 col-lg-4">
+                                                      <div class="d-flex flex-wrap align-items-center gap-2 float-lg-end">
+                                                            <div class="btn-group" role="group" aria-label="Status filter">
+                                                                  <input type="radio" class="btn-check cu-rounded" name="ticketStatusFilter" id="statusAllTicket" value="all" autocomplete="off" checked>
+                                                                  <label class="btn btn-outline-secondary" for="statusAllTicket"><i class="bi bi-ui-checks-grid me-1"></i>All</label>
+
+                                                                  <input type="radio" class="btn-check cu-rounded" name="ticketStatusFilter" id="statusValid" value="valid" autocomplete="off">
+                                                                  <label class="btn btn-outline-success mr-2" for="statusValid"><i class="bi bi-check-circle me-1"></i>Valid</label>
+
+                                                                  <input type="radio" class="btn-check" name="ticketStatusFilter" id="statusUsed" value="used" autocomplete="off">
+                                                                  <label class="btn btn-outline-warning" for="statusUsed"><i class="bi bi-check2-square me-1"></i>Used</label>
+
+                                                                  <input type="radio" class="btn-check" name="ticketStatusFilter" id="statusCanceled" value="canceled" autocomplete="off">
+                                                                  <label class="btn btn-outline-danger" for="statusCanceled"><i class="bi bi-x-circle me-1"></i>Canceled</label>
+                                                            </div>
+                                                            <button type="button" id="resetTicketFilters" class="btn btn-outline-secondary cu-rounded">
+                                                                  <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                                                            </button>
+                                                      </div>
+                                                </div>
+
+                                          </div>
+
+                                          <div id="ticketActiveFilters" class="mt-2"></div>
+                                    </div>
+                              </div>
+                        </div>
+                  </div>
+
+                  <div class="col-12">
                         <div class="tile-body">
-                              <div class="cities row row-cols-1 row-cols-xl-3 g-4">
+                              <div id="ticketNoResults" class="d-none">
+                                    <div class="alert alert-light border d-flex justify-content-between align-items-center cu-rounded">
+                                          <div><i class="bi bi-exclamation-circle text-warning me-2"></i>No tickets match your filters.</div>
+                                          <button type="button" class="btn btn-sm btn-outline-secondary" id="clearTicketFiltersBtn"><i class="bi bi-x-circle me-1"></i> Clear</button>
+                                    </div>
+                              </div>
+                              <div class="tickets row row-cols-1 row-cols-xl-3 g-4">
                                     {{-- foreach to fetch all Ticket --}}
                                     @foreach ($tickets as $ticket)
-                                          <div class="col-lg-4 col-md-12 h-100 tr">
+                                          <div class="col-lg-4 col-md-12 h-100 tr" data-event-name="{{ $ticket->event->title }}" data-user-name="{{ $ticket->user->full_name }}" data-ticket-status="{{ $ticket->status }}">
                                                 <div
                                                       class="card ticket-card shadow-lg border-0 cu-rounded overflow-hidden">
                                                       {{-- event image--}}
@@ -106,5 +155,9 @@
 
             </div>
       </main>
+
+      @section('scripts')
+            <script src="{{ asset('dashboards/js/ticket.js') }}"></script>
+      @endsection
 
 </x-dashboard.layouts>

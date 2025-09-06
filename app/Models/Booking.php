@@ -20,6 +20,7 @@ class Booking extends Model
         'order_id',
         'check_in',
         'check_out',
+        'total_price',
         'status'
     ];
 

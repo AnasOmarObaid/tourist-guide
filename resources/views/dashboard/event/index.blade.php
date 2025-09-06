@@ -1,5 +1,16 @@
 <x-dashboard.layouts>
 
+          @section('css')
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+            <style>
+                  .select2 {
+                        width: initial !important;
+                        display: block;
+                  }
+            </style>
+      @endsection
+
       <main class="app-content">
 
             <div class="app-title">
@@ -16,15 +27,108 @@
 
             <div class="row">
 
-                  <div class="col-12">
-                        <div class="tile" style="border-radius: 1.5rem;">
+                {{-- filter search --}}
+                <div class="col-12">
+                        <div class="tile cu-rounded border shadow-sm w-100">
                               <div class="tile-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                          <a href="{{ route('dashboard.event.create') }}"
-                                                class="btn btn-primary cu-rounded">
-                                                <i class="bi bi-plus"></i>Create Event
-                                          </a>
-                                    </div>
+                                    @php
+                                          $priceMin = 1;
+                                          $priceMax = 9999;
+                                          $selectedMin = (int) (request('price_min') !== null ? request('price_min') : $priceMin);
+                                          $selectedMax = (int) (request('price_max') !== null ? request('price_max') : $priceMax);
+                                          if ($selectedMin < $priceMin) $selectedMin = $priceMin;
+                                          if ($selectedMax > $priceMax) $selectedMax = $priceMax;
+                                          if ($selectedMin > $selectedMax) { $tmp = $selectedMin; $selectedMin = $selectedMax; $selectedMax = $tmp; }
+                                          $selectedTags = collect(request('tags', []))->map(fn($v) => (int) $v)->toArray();
+                                    @endphp
+
+                                    <form method="GET" action="{{ route('dashboard.event.index') }}" class="mb-2">
+
+                                          <div class="row g-2 align-items-end">
+
+                                                {{-- search --}}
+                                                <div class="col-md-4">
+                                                      <label class="form-label">Search</label>
+                                                      <input type="text" name="q" class="form-control" placeholder="Search events by name..." value="{{ request('q') }}">
+                                                </div>
+
+                                                   {{-- start at --}}
+                                                <div class="col-md-3">
+                                                      <label class="form-label">Start date (from)</label>
+                                                      <input type="date" id="start_at" name="start_at_from" class="form-control" value="{{ request('start_at_from') }}">
+                                                </div>
+
+                                                {{-- end at --}}
+                                                <div class="col-md-3">
+                                                      <label class="form-label">End date (to)</label>
+                                                      <input type="date" id="end_at" name="end_at_to" class="form-control" value="{{ request('end_at_to') }}">
+                                                </div>
+
+                                                {{-- tags --}}
+                                                <div class="col-md-3">
+                                                      <label class="form-label">Tags</label>
+                                                      <select name="tags[]" class="form-select" id="tags_id" multiple>
+                                                            @foreach ($tags as $tag)
+                                                                  <option value="{{ $tag->id }}" {{ in_array($tag->id, $selectedTags) ? 'selected' : '' }}>{{ $tag->name }}</option>
+                                                            @endforeach
+                                                      </select>
+                                                </div>
+
+                                                {{-- city --}}
+                                                <div class="col-md-2">
+                                                      <label class="form-label">City</label>
+                                                      <select name="city_id" class="form-select" id="city_id">
+                                                            <option value="">Any</option>
+                                                            @foreach ($cities as $city)
+                                                                  <option value="{{ $city->id }}" {{ request('city_id') == $city->id ? 'selected' : '' }}>{{ $city->name }}</option>
+                                                            @endforeach
+                                                      </select>
+                                                </div>
+
+                                                {{-- status --}}
+                                                <div class="col-md-3">
+                                                      <label class="form-label">Status</label>
+                                                      <select name="status" class="form-select" id="status_id">
+                                                            <option value="any" selected>Any</option>
+                                                            <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active</option>
+                                                            <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Cancelled</option>
+                                                      </select>
+                                                </div>
+
+                                                {{-- price --}}
+                                                <div class="col-12 mt-4">
+                                                      <div class="p-2 border rounded">
+                                                            <div class="row g-2">
+                                                                  <div class="col-md-3">
+                                                                        <label class="form-label">Min price</label>
+                                                                        <input type="number" class="form-control" name="price_min" id="price_min" min="{{ $priceMin }}" max="{{ $priceMax }}" value="{{ $selectedMin }}">
+                                                                  </div>
+                                                                  <div class="col-md-3">
+                                                                        <label class="form-label">Max price</label>
+                                                                        <input type="number" class="form-control" name="price_max" id="price_max" min="{{ $priceMin }}" max="{{ $priceMax }}" value="{{ $selectedMax }}">
+                                                                  </div>
+                                                                  <div class="col-md-6">
+                                                                        <label class="form-label">Price range</label>
+                                                                        <div class="d-flex flex-column">
+                                                                              <input type="range" class="form-range" id="price_min_range" min="{{ $priceMin }}" max="{{ $priceMax }}" value="{{ $selectedMin }}">
+                                                                              <input type="range" class="form-range mt-1" id="price_max_range" min="{{ $priceMin }}" max="{{ $priceMax }}" value="{{ $selectedMax }}">
+                                                                              <small class="text-muted">Current: <span id="price_display">${{ $selectedMin }} - ${{ $selectedMax }}</span></small>
+                                                                        </div>
+                                                                  </div>
+                                                            </div>
+                                                      </div>
+                                                </div>
+
+                                                <div class="col-md-2 ms-auto">
+                                                      <button type="submit" class="btn btn-outline-primary cu-rounded w-100">Apply</button>
+                                                </div>
+                                                <div class="col-md-2">
+                                                      <a href="{{ route('dashboard.event.index') }}" class="btn btn-outline-secondary cu-rounded w-100">Reset</a>
+                                                </div>
+
+                                          </div>
+                                    </form>
+
                               </div>
                         </div>
                   </div>
@@ -122,5 +226,12 @@
 
             </div>
       </main>
+
+      @section('scripts')
+            <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+            <script src="{{ asset('dashboards/js/event.js') }}">
+            </script>
+      @endsection
 
 </x-dashboard.layouts>

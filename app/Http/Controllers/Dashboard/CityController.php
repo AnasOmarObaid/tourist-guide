@@ -18,9 +18,12 @@ class CityController extends Controller
      */
     public function index()
     {
-        $cities = City::with('image')
+        $cities = City::with(['image', 'hotels', 'events'])
+            ->withCount('hotels')
+            ->withCount('events')
             ->latest()
             ->get();
+
 
         return view('dashboard.city.index', compact('cities'));
     }
@@ -43,13 +46,13 @@ class CityController extends Controller
             $data = $request->validated();
 
             // get status of city
-            $data['status'] = $request->has('status') ?? false;
+            $data['status'] = request()->has('status') ?? false;
 
             // create city
             $city = City::create($data);
 
             // store the image
-            if ($request->hasFile('image'))
+            if (request()->hasFile('image'))
                 $image->store($request, $city, 'cities');
 
             // return redirect back
@@ -64,7 +67,26 @@ class CityController extends Controller
      */
     public function show(City $city)
     {
-        //
+        try {
+
+            $hotels = $city->hotels()
+                ->with(['city:id,name', 'tags:id,name', 'services:id,name'])
+                ->withCount('bookings')
+                ->get();
+
+            $events = $city->events()
+                ->with(['city:id,name', 'tags:id,name', 'image'])
+                ->withCount('tickets')
+                ->get();
+
+            return response()->json([
+                'hotels' => $hotels,
+                'events' => $events,
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', "Something went wrong, please try again later => " . $e->getMessage());
+        }
     }
 
     /**
@@ -85,13 +107,13 @@ class CityController extends Controller
             $data = $request->validated();
 
             // set status
-            $data['status'] = $request->has('status') ?? false;
+            $data['status'] = request()->has('status') ?? false;
 
             // update city
             $city->update($data);
 
             // update image
-            if ($request->hasFile('image'))
+            if (request()->hasFile('image'))
                 $image->update($request, $city, 'cities');
 
             // return back with success message

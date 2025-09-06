@@ -52,12 +52,11 @@
 <body>
 
     <div class="container">
-        <img src="{{ asset('images/drinks.svg') }}" alt="Lost Drink" class="shake-cup mb-4 animate__animated animate__bounceInDown">
 
         <h1 class="display-4 text-light fw-bold">404 - Page Not Found</h1>
         <p class="lead text-white mb-4">Looks like your drink spilled on the wrong table...</p>
 
-        <a href="" class="btn btn-primary btn-lg">Back to Login</a>
+        <a href="{{ route('dashboard.welcome') }}" class="btn btn-primary btn-lg">Back to login</a>
 
         <img src="https://cdn-icons-png.flaticon.com/512/3456/3456478.png" alt="Spilled Drink" class="splash animate__animated animate__fadeInUp">
     </div>

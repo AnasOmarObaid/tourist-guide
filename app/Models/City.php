@@ -82,6 +82,11 @@ class City extends Model
         return $this->hasMany(Event::class);
     }
 
+    /**
+     * hotels
+     *
+     * @return HasMany
+     */
     public function hotels() : HasMany
     {
         return $this->hasMany(Hotel::class);
