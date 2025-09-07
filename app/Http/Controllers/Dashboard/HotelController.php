@@ -23,15 +23,17 @@ class HotelController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $hotels = Hotel::with(['tags', 'services', 'city', 'images', 'bookings.user'])
+            ->filter($request)
             ->latest()
             ->withCount('bookings')
             ->get();
 
         $services = Service::get();
-        return view('dashboard.hotel.index', compact('hotels', 'services'));
+        $cities = City::get();
+        return view('dashboard.hotel.index', compact('hotels', 'services', 'cities'));
     }
 
     /**

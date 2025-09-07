@@ -23,8 +23,10 @@ $(document).ready(function () {
       var eventName = (($(this).data("event-name")) || "").toString().toLowerCase();
       var userName = (($(this).data("user-name")) || "").toString().toLowerCase();
       var tStatus = (($(this).data("ticket-status")) || "").toString().toLowerCase();
+      // Try data attribute first, fallback to reading the barcode text from the card
+      var barcode = (($(this).data("barcode")) || $(this).find('p.text-muted.small').first().text() || "").toString().toLowerCase();
 
-      var nameMatch = !query || eventName.indexOf(query) !== -1 || userName.indexOf(query) !== -1;
+      var nameMatch = !query || eventName.indexOf(query) !== -1 || userName.indexOf(query) !== -1 || barcode.indexOf(query) !== -1;
       var statusMatch = status === "all" || tStatus === status;
 
       $(this).toggle(nameMatch && statusMatch);

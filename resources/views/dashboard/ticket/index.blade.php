@@ -17,19 +17,6 @@
             <div class="row">
 
                   <div class="col-12">
-                        <div class="tile" style="border-radius: 1.5rem;">
-                              <div class="tile-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                          <a href="{{ route('dashboard.event.create') }}"
-                                                class="btn btn-primary cu-rounded">
-                                                <i class="bi bi-plus"></i>Create Event
-                                          </a>
-                                    </div>
-                              </div>
-                        </div>
-                  </div>
-
-                  <div class="col-12">
                         <div class="tile cu-rounded border shadow-sm w-100">
                               <div class="tile-body">
                                     <div class="filter-card">

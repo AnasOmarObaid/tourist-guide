@@ -39,7 +39,7 @@ class AdminAuthController extends Controller
     public function login(AdminLoginRequest $request): RedirectResponse
     {
         // validate the request
-        $credentials = $request->only('email', 'password');
+        $credentials = request()->only('email', 'password');
 
         // call auth service
         $user = $this->auth_service->attemptLogin($credentials,  1);

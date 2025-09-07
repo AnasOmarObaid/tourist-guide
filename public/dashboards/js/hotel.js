@@ -1,4 +1,4 @@
-// make some scripts for filter
+// filtering the hotels based on the selected criteria
 document.addEventListener("DOMContentLoaded", function () {
   const minRange = document.getElementById("price_min_range");
   const maxRange = document.getElementById("price_max_range");
@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   const syncFromRange = () => {
-    let minVal = parse(minRange.value, parse(minRange.min, 0));
-    let maxVal = parse(maxRange.value, parse(maxRange.max, 0));
+    let minVal = parse(minRange.value, parseInt(minRange.min) || 0);
+    let maxVal = parse(maxRange.value, parseInt(maxRange.max) || 0);
     if (minVal > maxVal) [minVal, maxVal] = [maxVal, minVal];
     minRange.value = minVal;
     maxRange.value = maxVal;
@@ -26,10 +26,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const clamp = (val, min, max) => Math.min(max, Math.max(min, val));
 
   const syncFromInputs = () => {
-    const minLimit = parse(minRange.min, 0);
-    const maxLimit = parse(maxRange.max, 0);
-    let minVal = clamp(parse(minInput.value, minLimit), minLimit, maxLimit);
-    let maxVal = clamp(parse(maxInput.value, maxLimit), minLimit, maxLimit);
+    const minLimit = parseInt(minRange.min) || 0;
+    const maxLimit = parseInt(maxRange.max) || 0;
+    let minVal = clamp(
+      parseInt(minInput.value) || minLimit,
+      minLimit,
+      maxLimit
+    );
+    let maxVal = clamp(
+      parseInt(maxInput.value) || maxLimit,
+      minLimit,
+      maxLimit
+    );
     if (minVal > maxVal) [minVal, maxVal] = [maxVal, minVal];
     minRange.value = minVal;
     maxRange.value = maxVal;
@@ -44,50 +52,34 @@ document.addEventListener("DOMContentLoaded", function () {
   syncFromRange();
 });
 
-// make some select2 and date piker
+// live preview
 $(document).ready(function () {
   $("#city_id").select2({
     placeholder: "Select a city",
   });
-});
 
-$(document).ready(function () {
   $("#tags_id").select2({
     placeholder: "Select tags",
   });
-});
 
-$(document).ready(function () {
   $("#status_id").select2({
     placeholder: "Select status",
   });
-});
 
-$("#start_at").flatpickr({
-  enableTime: true,
-  minDate: "today",
-});
+  $("#service_id").select2({
+    placeholder: "Select Service",
+  });
 
-$("#end_at").flatpickr({
-  enableTime: true,
-  minDate: "today",
+  $("#date_from").flatpickr({
+    enableTime: true
+  });
 
-});
-
-$("#start_at_from").flatpickr({
+  $("#date_to").flatpickr({
     enableTime: true,
-    minDate: "2015-01"
-});
+  });
 
-$("#end_at_to").flatpickr({
-    enableTime: true,
-    minDate: "2015-01"
-});
-
-// live preview
-$(document).ready(function () {
-  // live image preview
-  $("#event_image").on("change", function (e) {
+  // live image preview (cover)
+  $("#cover_image").on("change", function (e) {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -98,24 +90,44 @@ $(document).ready(function () {
     }
   });
 
+  // live room images preview (multiple)
+  $("#room_images").on("change", function (e) {
+    const files = e.target.files;
+    const preview = $("#roomImagesPreview");
+    preview.empty();
+    if (files && files.length > 0) {
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = $("<img>").attr("src", e.target.result).css({
+            width: "80px",
+            height: "80px",
+            objectFit: "cover",
+            borderRadius: "0.5rem",
+            border: "1px solid #ddd",
+            marginRight: "8px",
+            marginBottom: "8px",
+          });
+          preview.append(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  });
+
+  // live price per night preview
+  $("#price_per_night").on("input", function () {
+    $("#price_per_night_preview").text("$" + $(this).val() + "/night" || "");
+  });
+
   // live title preview
-  $("#title").on("input", function () {
-    $("#title_preview").text($(this).val() || "");
+  $("#name").on("input", function () {
+    $("#name_preview").text($(this).val() || "");
   });
 
   // live description preview
   $("#description").on("input", function () {
     $("#description_preview").text($(this).val() || "");
-  });
-
-  // live start_at preview
-  $("#start_at").on("input", function () {
-    $("#start_at_preview").text($(this).val() || "");
-  });
-
-  // live end_at preview
-  $("#end_at").on("input", function () {
-    $("#end_at_preview").text($(this).val() || "");
   });
 
   // live city preview
@@ -128,14 +140,19 @@ $(document).ready(function () {
     $("#venue_preview").text($(this).val() || "");
   });
 
-  // live price preview
-  $("#price").on("input", function () {
-    $("#price_preview").text("$" + $(this).val() || "");
+  // live organizer preview
+  $("#owner").on("input", function () {
+    $("#owner_preview").text("Owned by " + $(this).val() || "Owned by");
   });
 
-  // live organizer preview
-  $("#organizer").on("input", function () {
-    $("#organizer_preview").text($(this).val() || "");
+  // live rating preview
+  $("#rate").on("input", function () {
+    $("#rate_preview").empty();
+    if ($(this).val() <= 5)
+      for (let i = 0; i < $(this).val(); ++i)
+        $("#rate_preview").append(
+          $("#rate_preview").append(`<i class="bi bi-star-fill"></i>` || "")
+        );
   });
 
   // live tags preview, append tags when select in multi tag
@@ -146,6 +163,19 @@ $(document).ready(function () {
       .each(function () {
         $("#tags_preview").append(
           `<span class="tag-badge">${$(this).text()}</span>`
+        );
+      });
+  });
+
+  // live service preview, append tags when select in multi tag
+  $("#service_id").on("change", function () {
+    $("#services_preview").empty();
+    $(this)
+      .find("option:selected")
+      .each(function () {
+        $("#services_preview").append(
+          `<span class="badge bg-light text-dark border me-1 cu-rounded"><i class="bi bi-check-circle-fill text-success cu-rounded""></i>
+            ${$(this).text()}</span>`
         );
       });
   });

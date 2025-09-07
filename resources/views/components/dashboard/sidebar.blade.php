@@ -1,11 +1,11 @@
 <div class="app-sidebar__overlay" data-toggle="sidebar"></div>
 
 <aside class="app-sidebar">
-      <div class="app-sidebar__user"><img class="app-sidebar__user-avatar"
-                  src="https://randomuser.me/api/portraits/men/1.jpg" alt="User Image">
+      <div class="app-sidebar__user"><img class="table-user-image app-sidebar__user-avatar"
+                  src="{{ asset(Auth::user()->getImagePath()) }}" width="60" height="60" alt="User Image">
             <div>
-                  <p class="app-sidebar__user-name">Name here</p>
-                  <p class="app-sidebar__user-designation">Role here</p>
+                  <p class="app-sidebar__user-name">{{ auth()->user()->full_name }}</p>
+                  <p class="app-sidebar__user-designation">Super admin</p>
             </div>
       </div>
       <ul class="app-menu">
@@ -73,28 +73,26 @@
              <li><a class="app-menu__item {{ request()->routeIs('dashboard.booking.index') ? 'active' : '' }}" href="{{ route('dashboard.booking.index') }}"><i class="app-menu__icon bi bi-bookmark-fill"></i><span
                               class="app-menu__label">Bookings</span></a></li>
 
-            <li class="treeview"><a class="app-menu__item" href="#" data-toggle="treeview"><i
-                              class="app-menu__icon bi bi-file-earmark"></i><span class="app-menu__label">Pages</span><i
-                              class="treeview-indicator bi bi-chevron-right"></i></a>
-                  <ul class="treeview-menu">
-                        <li><a class="treeview-item" href="blank-page.html"><i class="icon bi bi-circle-fill"></i> Blank
-                                    Page</a></li>
-                        <li><a class="treeview-item" href="page-login.html"><i class="icon bi bi-circle-fill"></i> Login
-                                    Page</a></li>
-                        <li><a class="treeview-item" href="page-lockscreen.html"><i class="icon bi bi-circle-fill"></i>
-                                    Lockscreen Page</a></li>
-                        <li><a class="treeview-item" href="page-user.html"><i class="icon bi bi-circle-fill"></i> User
-                                    Page</a></li>
-                        <li><a class="treeview-item" href="page-invoice.html"><i class="icon bi bi-circle-fill"></i>
-                                    Invoice Page</a></li>
-                        <li><a class="treeview-item" href="page-mailbox.html"><i class="icon bi bi-circle-fill"></i>
-                                    Mailbox</a></li>
-                        <li><a class="treeview-item" href="page-error.html"><i class="icon bi bi-circle-fill"></i> Error
-                                    Page</a></li>
-                  </ul>
+             {{-- settings --}}
+             <li><a class="app-menu__item mt-1 {{ request()->routeIs('dashboard.setting.index') ? 'active' : '' }}" href="{{ route('dashboard.setting.index') }}"><i class="app-menu__icon bi bi-gear-fill"></i><span
+                              class="app-menu__label">Settings</span></a></li>
+
+            {{-- profile --}}
+            <li><a class="app-menu__item mt-1 {{ request()->routeIs('dashboard.profile.edit') ? 'active' : '' }}" href="{{ route('dashboard.profile.edit') }}"><i class="app-menu__icon bi bi-person-circle"></i><span
+                              class="app-menu__label">Profile</span></a></li>
+
+            {{-- logout --}}
+            <li>
+                <form class='form' method="POST" action="{{ route('dashboard.auth.logout') }}">
+                    @csrf
+                    <button class="btn p-0 w-100" type='submit'>
+                        <a class="app-menu__item ">
+                            <i class="bi bi-box-arrow-right me-2 fs-5"></i>
+                            Logout
+                        </a>
+                    </button>
+                </form>
             </li>
-            <li><a class="app-menu__item" href="docs.html"><i class="app-menu__icon bi bi-code-square"></i><span
-                              class="app-menu__label">Docs</span></a></li>
       </ul>
 </aside>
 

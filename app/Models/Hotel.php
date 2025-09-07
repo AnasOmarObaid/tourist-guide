@@ -46,7 +46,7 @@ class Hotel extends Model
     ];
 
     /**
-     * getCoverUrlAttribute
+     * getCoverAttribute
      *
      * @return void
      */
@@ -173,6 +173,68 @@ class Hotel extends Model
     public function getCoverPath(): string
     {
         return $this->hasCover() ? 'storage/' . $this->cover : 'https://placehold.co/600x400/';
+    }
+
+    /**
+     * A single filtering scope using when()
+     * Keys: q, city_ids[], service_ids[], statuses[], price_min, price_max
+     */
+    public function scopeFilter($query, $filters)
+    {
+        $filters = $filters instanceof \Illuminate\Http\Request ? $filters->all() : (array) $filters;
+        $f = collect($filters);
+
+        $q = trim((string) ($f->get('q') ?? ''));
+        $cityIds = collect($f->get('city_ids', []))->map(fn($v) => (int) $v)->filter()->values()->all();
+        $serviceIds = collect($f->get('service_ids', []))->map(fn($v) => (int) $v)->filter()->values()->all();
+        $statuses = collect($f->get('statuses', []))
+            ->map(function ($v) { return ($v === '1' || $v === 1 || $v === true || $v === 'true') ? 1 : (($v === '0' || $v === 0 || $v === false || $v === 'false') ? 0 : null); })
+            ->filter(fn($v) => $v === 0 || $v === 1)
+            ->unique()->values()->all();
+
+        $floor = 1; $ceil = 9999;
+        $hasMin = ($f->get('price_min') !== null && $f->get('price_min') !== '');
+        $hasMax = ($f->get('price_max') !== null && $f->get('price_max') !== '');
+        $dateFrom = $f->get('date_from');
+        $dateTo = $f->get('date_to');
+
+        return $query
+            ->when($q !== '', function ($qb) use ($q) {
+                $qb->where(function ($qq) use ($q) {
+                    $qq->where('name', 'like', "%{$q}%")
+                       ->orWhere('owner', 'like', "%{$q}%")
+                       ->orWhere('venue', 'like', "%{$q}%");
+                });
+            })
+            ->when(!empty($cityIds), function ($qb) use ($cityIds) {
+                $qb->whereIn('city_id', $cityIds);
+            })
+            ->when(!empty($serviceIds), function ($qb) use ($serviceIds) {
+                $qb->whereHas('services', function ($qs) use ($serviceIds) {
+                    $qs->whereIn('services.id', $serviceIds);
+                });
+            })
+            ->when(!empty($statuses), function ($qb) use ($statuses) {
+                $qb->whereIn('status', $statuses);
+            })
+            ->when($hasMin || $hasMax, function ($qb) use ($f, $floor, $ceil, $hasMin, $hasMax) {
+                $min = $hasMin ? max($floor, (int) $f->get('price_min')) : $floor;
+                $max = $hasMax ? min($ceil, (int) $f->get('price_max')) : $ceil;
+                if ($min > $max) { [$min, $max] = [$max, $min]; }
+                // Only apply filter if values are different from defaults
+                if ($min > $floor || $max < $ceil) {
+                    $qb->whereBetween('price_per_night', [$min, $max]);
+                }
+            })
+            ->when($dateFrom && $dateTo, function ($qb) use ($dateFrom, $dateTo) {
+                $qb->whereBetween('created_at', [$dateFrom, $dateTo]);
+            })
+            ->when($dateFrom && !$dateTo, function ($qb) use ($dateFrom) {
+                $qb->whereDate('created_at', '>=', $dateFrom);
+            })
+            ->when(!$dateFrom && $dateTo, function ($qb) use ($dateTo) {
+                $qb->whereDate('created_at', '<=', $dateTo);
+            });
     }
 
     public static function booted()

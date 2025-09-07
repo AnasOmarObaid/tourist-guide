@@ -3,7 +3,7 @@
 
 <head>
       <meta name="description"
-            content="The project aims to create a smart ordering system for cafeterias using QR codes. Each table in the cafeteria has its own QR code, which, when scanned, allows customers to access the beverage menu and place orders directly from their phone. Orders are sent to the cashier's control panel in real time, accompanied by an audible alert, and the order status is tracked in real time.">
+            content="is a platform that helps travelers discover cities, find events, and book hotels. We aggregate curated listings, real attendee insights, and up-to-date availability to make trip planning simple and secure.">
 
       <!-- Twitter meta-->
       <meta property="twitter:card" content="summary_large_image">
@@ -20,7 +20,7 @@
       <meta property="og:url" content="http://pratikborsadiya.in/blog/vali-admin">
       <meta property="og:image" content="http://pratikborsadiya.in/blog/vali-admin/hero-social.png">
       <meta property="og:description"
-            content="The project aims to create a smart ordering system for cafeterias using QR codes. Each table in the cafeteria has its own QR code, which, when scanned, allows customers to access the beverage menu and place orders directly from their phone. Orders are sent to the cashier's control panel in real time, accompanied by an audible alert, and the order status is tracked in real time.">
+            content="is a platform that helps travelers discover cities, find events, and book hotels. We aggregate curated listings, real attendee insights, and up-to-date availability to make trip planning simple and secure.">
 
 
       <title>Tourist Guide</title>

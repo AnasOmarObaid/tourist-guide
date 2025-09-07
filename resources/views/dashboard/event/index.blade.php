@@ -1,6 +1,6 @@
 <x-dashboard.layouts>
 
-          @section('css')
+        @section('css')
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
             <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
             <style>
@@ -9,7 +9,7 @@
                         display: block;
                   }
             </style>
-      @endsection
+        @endsection
 
       <main class="app-content">
 
@@ -52,16 +52,16 @@
                                                       <input type="text" name="q" class="form-control" placeholder="Search events by name..." value="{{ request('q') }}">
                                                 </div>
 
-                                                   {{-- start at --}}
+                                                {{-- start at --}}
                                                 <div class="col-md-3">
                                                       <label class="form-label">Start date (from)</label>
-                                                      <input type="date" id="start_at" name="start_at_from" class="form-control" value="{{ request('start_at_from') }}">
+                                                      <input type="date" id="start_at_from" name="start_at_from" class="form-control" value="{{ request('start_at_from') ? \Carbon\Carbon::parse(request('start_at_from'))->toDateString() : '' }}">
                                                 </div>
 
                                                 {{-- end at --}}
                                                 <div class="col-md-3">
                                                       <label class="form-label">End date (to)</label>
-                                                      <input type="date" id="end_at" name="end_at_to" class="form-control" value="{{ request('end_at_to') }}">
+                                                      <input type="date" id="end_at_to" name="end_at_to" class="form-control" value="{{ request('end_at_to') ? \Carbon\Carbon::parse(request('end_at_to'))->toDateString() : '' }}">
                                                 </div>
 
                                                 {{-- tags --}}
@@ -89,7 +89,7 @@
                                                 <div class="col-md-3">
                                                       <label class="form-label">Status</label>
                                                       <select name="status" class="form-select" id="status_id">
-                                                            <option value="any" selected>Any</option>
+                                                            <option value="" {{ request('status') === null || request('status') === '' ? 'selected' : '' }}>Any</option>
                                                             <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Active</option>
                                                             <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Cancelled</option>
                                                       </select>

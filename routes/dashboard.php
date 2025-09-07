@@ -7,8 +7,10 @@ use App\Http\Controllers\Dashboard\CityController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\EventController;
 use App\Http\Controllers\Dashboard\HotelController;
+use App\Http\Controllers\Dashboard\ProfileController;
 use App\Http\Controllers\Dashboard\TicketController;
 use App\Http\Controllers\Dashboard\UserController;
+use App\Http\Controllers\SettingController;
 use App\Models\Ticket;
 
 // dashboard routes
@@ -65,6 +67,23 @@ Route::controller(TicketController::class)->prefix('ticket/')->name('ticket.')->
 // bookings routes
 Route::controller(BookingController::class)->prefix('booking/')->name('booking.')->group(function (){
     Route::get('/', 'index')->name('index');
+});
+
+// profile routes
+Route::controller(ProfileController::class)->prefix('profile/')->name('profile.')->group(function () {
+    Route::get('/edit', 'edit')->name('edit');
+    Route::put('/', 'update')->name('update');
+    Route::put('/password', 'updatePassword')->name('updatePassword');
+});
+
+// profile routes
+Route::controller(ProfileController::class)->prefix('/profile')->name('profile.')->group(function(){
+    Route::get('edit/', 'edit')->name('edit');
+});
+
+Route::controller(SettingController::class)->prefix('/setting')->name('setting.')->group(function(){
+    Route::get('/', 'index')->name('index');
+    Route::post('/', 'store')->name('store');
 });
 
 // logout route

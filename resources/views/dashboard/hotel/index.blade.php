@@ -1,5 +1,16 @@
 <x-dashboard.layouts>
 
+            @section('css')
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+                <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+                <style>
+                    .select2 {
+                            width: initial !important;
+                            display: block;
+                    }
+                </style>
+            @endsection
+
       <main class="app-content">
 
             <div class="app-title">
@@ -15,90 +26,98 @@
             </div>
 
             <div class="row">
-
+                {{-- filtering --}}
                   <div class="col-12">
                         <div class="tile cu-rounded">
                               <div class="tile-body">
-                                    {{-- Search, Filters & Sort --}}
-                                    <form method="GET" action="" class="mb-4">
+                                    @php
+                                          $priceMin = 1;
+                                          $priceMax = 9999;
+                                          $selectedMin = (int) (request('price_min') !== null ? request('price_min') : $priceMin);
+                                          $selectedMax = (int) (request('price_max') !== null ? request('price_max') : $priceMax);
+                                          if ($selectedMin < $priceMin) $selectedMin = $priceMin;
+                                          if ($selectedMax > $priceMax) $selectedMax = $priceMax;
+                                          if ($selectedMin > $selectedMax) { $tmp = $selectedMin; $selectedMin = $selectedMax; $selectedMax = $tmp; }
+                                          $selectedCities = collect(request('city_ids', []))->map(fn($v) => (int) $v)->toArray();
+                                          $selectedStatuses = collect(request('statuses', []))->map(fn($v) => (string) $v)->toArray();
+                                          $selectedServices = collect(request('service_ids', []))->map(fn($v) => (int) $v)->toArray();
+                                    @endphp
+                                    <form method="GET" action="{{ route('dashboard.hotel.index') }}" class="mb-2">
                                           <div class="row g-2 align-items-end">
 
-                                                {{-- Search --}}
-                                                <div class="col-md-3">
+                                                <div class="col-md-4">
                                                       <label class="form-label">Search</label>
-                                                      <input type="text" name="q" class="form-control"
-                                                            placeholder="Search hotels..." value="{{ request('q') }}">
+                                                      <input type="text" name="q" class="form-control" placeholder="Search hotels by name, owner, or venue..." value="{{ request('q') }}">
                                                 </div>
 
-                                                {{-- Price Min --}}
-                                                <div class="col-md-2">
-                                                      <label class="form-label">Min Price</label>
-                                                      <input type="number" name="min_price" class="form-control"
-                                                            value="{{ request('min_price') }}">
-                                                </div>
-
-                                                {{-- Price Max --}}
-                                                <div class="col-md-2">
-                                                      <label class="form-label">Max Price</label>
-                                                      <input type="number" name="max_price" class="form-control"
-                                                            value="{{ request('max_price') }}">
-                                                </div>
-
-                                                {{-- Rate --}}
-                                                <div class="col-md-2">
-                                                      <label class="form-label">Rate</label>
-                                                      <select name="rate" class="form-select">
-                                                            <option value="">Any</option>
-                                                            @for ($i = 1; $i <= 5; $i++)
-                                                                  <option value="{{ $i }}"
-                                                                        {{ request('rate') == $i ? 'selected' : '' }}>
-                                                                        {{ $i }} Star{{ $i > 1 ? 's' : '' }}
-                                                                  </option>
-                                                            @endfor
-                                                      </select>
-                                                </div>
-
-                                                {{-- Services --}}
-                                                <div class="col-md-2">
-                                                      <label class="form-label">Service</label>
-                                                      <select name="service_id" class="form-select">
-                                                            <option value="">Any</option>
-                                                            @foreach ($services as $service)
-                                                                  <option value="{{ $service->id }}"
-                                                                        {{ request('service_id') == $service->id ? 'selected' : '' }}>
-                                                                        {{ $service->name }}
-                                                                  </option>
+                                                <div class="col-md-4">
+                                                      <label class="form-label">Cities</label>
+                                                      <select name="city_ids[]" id="city_id" class="form-select" multiple>
+                                                            @foreach ($cities as $city)
+                                                                  <option value="{{ $city->id }}" {{ in_array($city->id, $selectedCities) ? 'selected' : '' }}>{{ $city->name }}</option>
                                                             @endforeach
                                                       </select>
                                                 </div>
 
-                                                {{-- Sort --}}
-                                                <div class="col-md-2">
-                                                      <label class="form-label">Sort By</label>
-                                                      <select name="sort" class="form-select">
-                                                            <option value="">Default</option>
-                                                            <option value="price_asc"
-                                                                  {{ request('sort') == 'price_asc' ? 'selected' : '' }}>
-                                                                  Price: Low → High</option>
-                                                            <option value="price_desc"
-                                                                  {{ request('sort') == 'price_desc' ? 'selected' : '' }}>
-                                                                  Price: High → Low</option>
-                                                            <option value="rate_desc"
-                                                                  {{ request('sort') == 'rate_desc' ? 'selected' : '' }}>
-                                                                  Rating: High → Low</option>
-                                                            <option value="latest"
-                                                                  {{ request('sort') == 'latest' ? 'selected' : '' }}>
-                                                                  Latest</option>
+                                                <div class="col-md-4">
+                                                      <label class="form-label">Status</label>
+                                                      <select name="statuses[]" id="status_id" class="form-select" multiple>
+                                                            <option value="1" {{ in_array('1', $selectedStatuses) ? 'selected' : '' }}>Active</option>
+                                                            <option value="0" {{ in_array('0', $selectedStatuses) ? 'selected' : '' }}>Cancelled</option>
                                                       </select>
                                                 </div>
 
-                                                {{-- Submit --}}
-                                                <div class="col-md-1">
-                                                      <button type="submit"
-                                                            class="btn btn-outline-primary w-100">Apply</button>
+                                                <div class="col-md-3">
+                                                      <label class="form-label">Services</label>
+                                                      <select name="service_ids[]" id="service_id" class="form-select" multiple>
+                                                            @foreach ($services as $service)
+                                                                  <option value="{{ $service->id }}" {{ in_array($service->id, $selectedServices) ? 'selected' : '' }}>{{ $service->name }}</option>
+                                                            @endforeach
+                                                      </select>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                      <label class="form-label">Date from</label>
+                                                      <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request('date_from') ? \Carbon\Carbon::parse(request('date_from'))->toDateString() : '' }}">
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                      <label class="form-label">Date to</label>
+                                                      <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request('date_to') ? \Carbon\Carbon::parse(request('date_to'))->toDateString() : '' }}">
+                                                </div>
+
+                                                <div class="col-12">
+                                                      <div class="p-2 border rounded">
+                                                            <div class="row g-2">
+                                                                  <div class="col-md-3">
+                                                                        <label class="form-label">Min price</label>
+                                                                        <input type="number" class="form-control" name="price_min" id="price_min" min="{{ $priceMin }}" max="{{ $priceMax }}" value="{{ $selectedMin }}">
+                                                                  </div>
+                                                                  <div class="col-md-3">
+                                                                        <label class="form-label">Max price</label>
+                                                                        <input type="number" class="form-control" name="price_max" id="price_max" min="{{ $priceMin }}" max="{{ $priceMax }}" value="{{ $selectedMax }}">
+                                                                  </div>
+                                                                  <div class="col-md-6">
+                                                                        <label class="form-label">Price range</label>
+                                                                        <div class="d-flex flex-column">
+                                                                              <input type="range" class="form-range" id="price_min_range" min="{{ $priceMin }}" max="{{ $priceMax }}" value="{{ $selectedMin }}">
+                                                                              <input type="range" class="form-range mt-1" id="price_max_range" min="{{ $priceMin }}" max="{{ $priceMax }}" value="{{ $selectedMax }}">
+                                                                              <small class="text-muted">Current: <span id="price_display">${{ $selectedMin }} - ${{ $selectedMax }}</span></small>
+                                                                        </div>
+                                                                  </div>
+                                                            </div>
+                                                      </div>
+                                                </div>
+
+                                                <div class="col-md-2 ms-auto">
+                                                      <button type="submit" class="btn btn-outline-primary w-100">Apply</button>
+                                                </div>
+                                                <div class="col-md-2">
+                                                      <a href="{{ route('dashboard.hotel.index') }}" class="btn btn-outline-secondary w-100">Reset</a>
                                                 </div>
                                           </div>
                                     </form>
+
                               </div>
                         </div>
 
@@ -205,5 +224,12 @@
 
                   </div>
       </main>
+
+      @section('scripts')
+            <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+            <script src="{{ asset('dashboards/js/hotel.js') }}">
+            </script>
+      @endsection
 
 </x-dashboard.layouts>

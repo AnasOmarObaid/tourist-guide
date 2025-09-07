@@ -65,7 +65,7 @@ class Booking extends Model
      */
     public function getFormattedCheckInAttribute(): string
     {
-        return $this->created_at->format('jS M - D - g:i A');
+        return $this->check_in->format('jS M - D - g:i A');
     }
 
      /**
@@ -75,7 +75,7 @@ class Booking extends Model
      */
     public function getFormattedCheckOutAttribute(): string
     {
-        return $this->created_at->format('jS M - D - g:i A');
+        return $this->check_out->format('jS M - D - g:i A');
     }
 
     /**
@@ -121,4 +121,42 @@ class Booking extends Model
             'orderable_id'
         )->where('orders.orderable_type', Hotel::class);
     }
+
+    /**
+     * A single filtering scope using when() for all supported filters.
+     * Keys: q (search: order_number, hotel name, user name)
+     * statuses[] (multi: confirmed|pending|canceled)
+     */
+    // public function scopeFilter($query, $filters)
+    // {
+    //     $filters = $filters instanceof \Illuminate\Http\Request ? $filters->all() : (array) $filters;
+    //     $f = collect($filters);
+
+    //     $q = trim((string) ($f->get('q') ?? ''));
+    //     $validStatuses = ['confirmed', 'pending', 'canceled'];
+    //     $statuses = collect($f->get('statuses', []))
+    //         ->map(fn($v) => strtolower((string) $v))
+    //         ->filter(fn($v) => in_array($v, $validStatuses, true))
+    //         ->unique()
+    //         ->values()
+    //         ->all();
+
+    //     return $query
+    //         ->when($q !== '', function ($qb) use ($q) {
+    //             $qb->where(function ($qq) use ($q) {
+    //                 $qq->whereHas('order', function ($qo) use ($q) {
+    //                     $qo->where('order_number', 'like', "%{$q}%")
+    //                        ->orWhereHas('user', function ($qu) use ($q) {
+    //                            $qu->where('full_name', 'like', "%{$q}%");
+    //                        });
+    //                 })
+    //                 ->orWhereHas('hotel', function ($qh) use ($q) {
+    //                     $qh->where('name', 'like', "%{$q}%");
+    //                 });
+    //             });
+    //         })
+    //         ->when(!empty($statuses), function ($qb) use ($statuses) {
+    //             $qb->whereIn('status', $statuses);
+    //         });
+    // }
 }
