@@ -172,6 +172,120 @@ tourist-guide/
 └── public/             # Public Assets
 ```
 
+## 🆕 What's New (2025-09)
+
+- Dashboard enhancements
+  - KPI widgets: Revenue Today, Revenue This Month, Avg Order Value
+  - Charts: Monthly revenue (Tickets vs Bookings), Orders (last 7 days), Booking status distribution
+  - Top Cities lists by paid tickets and paid bookings
+  - Polished tables for Latest 10 Bookings and Latest 10 Tickets (avatars, thumbnails, totals)
+- Events
+  - Modern filter UI: search, tags multi-select, city select, status, price range (1–9999), date ranges
+  - One unified filter scope using query->when() with clamped price range and safe date handling
+- Hotels
+  - Modern filter UI: search, multi-selects (cities, services, statuses), price range sliders, date range (created_at)
+  - One unified filter scope using query->when() (cities[], services[], statuses[], price_min/max, date_from/to)
+- Tickets
+  - Modern filter UI on index (client-side) similar to cities: search (event, user, barcode) and status filters
+- Bookings
+  - New card layout with modern filter UI on index (client-side)
+  - Each booking displayed individually (not grouped)
+- Profile
+  - ProfileService for shared profile logic (web + mobile)
+  - ProfileController with edit/update and password update
+  - Modern profile edit page with avatar preview and password confirmation check
+
+## 🔎 How to Use Filters
+
+Web (Dashboard)
+
+- Events (GET params)
+  - q, tags[], city_id, status (1=Active, 0=Cancelled), price_min, price_max, start_at_from, start_at_to, end_at_from, end_at_to
+  - Example:
+    /dashboard/event?q=concert&tags[]=2&tags[]=5&city_id=3&status=1&price_min=200&price_max=400&start_at_from=2025-09-01&end_at_to=2025-09-30
+
+- Hotels (GET params)
+  - q, city_ids[], service_ids[], statuses[] (1=Active, 0=Cancelled), price_min, price_max, date_from, date_to
+  - Example:
+    /dashboard/hotel?q=beach&city_ids[]=1&city_ids[]=3&service_ids[]=2&statuses[]=1&price_min=100&price_max=500&date_from=2025-09-01&date_to=2025-09-30
+
+- Tickets (GET params)
+  - q (barcode, event title, user name), statuses[] (valid|used|canceled)
+  - Example:
+    /dashboard/ticket?q=TKT-ABCD&statuses[]=valid
+
+- Bookings (GET params)
+  - q (order number, hotel name, user name), statuses[] (confirmed|pending|canceled)
+  - Example:
+    /dashboard/booking?q=ORD-1234&statuses[]=confirmed
+
+Notes
+- Price range is clamped to 1–9999.
+- Dates should be in YYYY-MM-DD.
+- Filters are additive and support multi-select where noted.
+
+API / Mobile Integration
+- All filters are implemented as a single local scope on the model using query->when().
+- You can pass a Request or an array of filters.
+
+Examples (PHP)
+```php
+// Events
+$events = \App\Models\Event::with(['tags','city'])
+  ->filter([
+    'q' => 'concert',
+    'city_id' => 3,
+    'tags' => [2,5],
+    'status' => '1',
+    'price_min' => 200,
+    'price_max' => 400,
+    'start_at_from' => '2025-09-01',
+    'end_at_to' => '2025-09-30',
+  ])->paginate(20);
+
+// Hotels
+$hotels = \App\Models\Hotel::with(['services','city'])
+  ->filter([
+    'q' => 'beach',
+    'city_ids' => [1,3],
+    'service_ids' => [2],
+    'statuses' => ['1'],
+    'price_min' => 100,
+    'price_max' => 500,
+    'date_from' => '2025-09-01',
+    'date_to' => '2025-09-30',
+  ])->paginate(20);
+
+// Tickets
+$tickets = \App\Models\Ticket::with(['event.city','user'])
+  ->filter([
+    'q' => 'TKT-ABCD',
+    'statuses' => ['valid'],
+  ])->paginate(20);
+
+// Bookings
+$bookings = \App\Models\Booking::with(['hotel.city','user'])
+  ->filter([
+    'q' => 'ORD-',
+    'statuses' => ['confirmed'],
+  ])->paginate(20);
+```
+
+## 📸 Screenshots
+
+Add your screenshots to docs/screenshots and link them here:
+
+- Dashboard Overview
+  - docs/screenshots/dashboard-overview.png
+- Event Filters
+  - docs/screenshots/event-filters.png
+- Hotel Filters
+  - docs/screenshots/hotel-filters.png
+- Profile Edit
+  - docs/screenshots/profile-edit.png
+- Bookings & Tickets
+  - docs/screenshots/bookings-tickets.png
+
 ## 🎯 Usage
 
 ### For Tourists
