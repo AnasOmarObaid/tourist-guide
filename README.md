@@ -194,6 +194,11 @@ tourist-guide/
   - ProfileService for shared profile logic (web + mobile)
   - ProfileController with edit/update and password update
   - Modern profile edit page with avatar preview and password confirmation check
+- Users
+  - New “View” action on users table to preview a user’s Tickets and Bookings in a modal (AJAX)
+  - Added User relationships to avoid N+1: orders(), tickets() via orders (Event), bookings() via orders (Hotel)
+  - Implemented show endpoint returning compact JSON (tickets, bookings) for modal preview
+  - Enhanced ticket cards in user preview to match ticket/index styling, hotel cover images are cu-rounded
 
 ## 🔎 How to Use Filters
 
@@ -285,6 +290,16 @@ Add your screenshots to docs/screenshots and link them here:
   - docs/screenshots/profile-edit.png
 - Bookings & Tickets
   - docs/screenshots/bookings-tickets.png
+
+## 🛣️ Next Steps (API Roadmap)
+
+- Unify server-side filtering on API endpoints for Events, Hotels, Tickets, and Bookings (parity with dashboard filters)
+- Expose dashboard metrics via API (KPIs, monthly revenue, orders-by-day, top cities)
+- Add Profile API endpoints (update profile and password) powered by ProfileService
+- Add pagination, sorting, and comprehensive validation across listing APIs
+- Document all APIs with OpenAPI/Swagger and provide Postman collections
+- Add rate limiting and ETag/Last-Modified headers for selected endpoints
+- Harden error handling and consistent JSON envelope (success/data/errors)
 
 ## 🎯 Usage
 

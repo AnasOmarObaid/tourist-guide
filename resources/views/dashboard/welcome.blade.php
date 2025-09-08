@@ -11,32 +11,32 @@
                   </ul>
             </div>
             <div class="row">
-                  <div class="col-md-6 col-lg-3">
-                        <div class="widget-small primary coloured-icon"><i class="icon bi bi-people fs-1"></i>
+                  <div class="col-md-6 col-lg-3 cu-rounded">
+                        <div class="widget-small primary coloured-icon cu-rounded"><i class="cu-rounded icon bi bi-people fs-1"></i>
                               <div class="info">
                                     <h4>Users</h4>
                                     <p><b>{{ $usersCount }}</b></p>
                               </div>
                         </div>
                   </div>
-                  <div class="col-md-6 col-lg-3">
-                        <div class="widget-small info coloured-icon"><i class="icon bi bi-building fs-1"></i>
+                  <div class="col-md-6 col-lg-3 cu-rounded">
+                        <div class="widget-small info coloured-icon cu-rounded"><i class="cu-rounded icon bi bi-building fs-1"></i>
                               <div class="info">
                                     <h4>Cities</h4>
                                     <p><b>{{ $citiesCount }}</b></p>
                               </div>
                         </div>
                   </div>
-                  <div class="col-md-6 col-lg-3">
-                        <div class="widget-small warning coloured-icon"><i class="icon bi bi-receipt fs-1"></i>
+                  <div class="col-md-6 col-lg-3 cu-rounded">
+                        <div class="widget-small warning coloured-icon cu-rounded"><i class="cu-rounded icon bi bi-receipt fs-1"></i>
                               <div class="info">
                                     <h4>Tickets</h4>
                                     <p><b>{{ $ticketsCount }}</b></p>
                               </div>
                         </div>
                   </div>
-                  <div class="col-md-6 col-lg-3">
-                        <div class="widget-small danger coloured-icon"><i class="icon bi bi-bookmark-check fs-1"></i>
+                  <div class="col-md-6 col-lg-3 cu-rounded">
+                        <div class="widget-small danger coloured-icon cu-rounded"><i class="cu-rounded icon bi bi-bookmark-check fs-1"></i>
                               <div class="info">
                                     <h4>Bookings</h4>
                                     <p><b>{{ $bookingsCount }}</b></p>
@@ -175,7 +175,7 @@
                                                                         <img src="{{ $b->hotel->cover_url }}" class="rounded me-2" width="48" height="32" style="object-fit:cover" alt="hotel">
                                                                         <div>
                                                                               <div class="fw-semibold">{{ $b->hotel->name }}</div>
-                                                                              <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ $b->hotel->city->name }}</small>
+                                                                              <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ $b->hotel->city->name }}, {{ $b->hotel->venue  }}</small>
                                                                         </div>
                                                                   </div>
                                                             </td>
@@ -226,7 +226,7 @@
                                                                         <img src="{{ $t->event->image_url }}" class="rounded me-2" width="48" height="32" style="object-fit:cover" alt="event">
                                                                         <div>
                                                                               <div class="fw-semibold">{{ $t->event->title }}</div>
-                                                                              <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ $t->event->city->name }}</small>
+                                                                              <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ $t->event->city->name }}, {{ $t->event->venue }} </small>
                                                                         </div>
                                                                   </div>
                                                             </td>

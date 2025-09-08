@@ -65,12 +65,13 @@
                                                                               class="bi bi-pencil-square"></i>
                                                                   </a>
 
-                                                                  {{-- <a href=""
-                                                                        data-toggle="tooltip" data-placement="bottom"
+                                                                  <a href="#" data-toggle="tooltip" data-placement="bottom"
                                                                         title="Show user"
-                                                                        class="btn btn-outline-info btn-sm">
-                                                                        <i class="app-menu__icon bi bi-eye-fill"></i>
-                                                                  </a> --}}
+                                                                        class="btn btn-outline-primary btn-sm view-user-btn"
+                                                                        data-user-id="{{ $user->id }}"
+                                                                        data-url="{{ route('dashboard.user.show', $user) }}">
+                                                                        <i class="bi bi-eye-fill"></i>
+                                                                  </a>
 
                                                                   <form action="{{ route('dashboard.user.destroy', $user) }}" method="post" class="d-inline-block">
                                                                          @csrf
@@ -95,6 +96,21 @@
                   </div>
             </div>
 
+      <!-- Modal for User Preview -->
+      <div class="modal modal-xl fade" id="userPreviewModal" tabindex="-1" aria-labelledby="userPreviewModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="userPreviewModalLabel">User Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="userPreviewContent">
+                        <!-- Tickets and bookings will be loaded here -->
+                    </div>
+                </div>
+            </div>
+      </div>
+
       </main>
 
       @section('scripts')
@@ -116,22 +132,7 @@
                   src="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.3.3/af-2.7.0/b-3.2.4/b-colvis-3.2.4/b-html5-3.2.4/b-print-3.2.4/datatables.js"
                   integrity="sha384-hD4H5eNTpwxgHNVQJOxRxoE8PyGs1b5T2mVaub4P9ult0pmm+MB6gip45K27gRQp" crossorigin="anonymous">
             </script>
-            <script>
-                  $(document).ready(function() {
-                        $('#userTable').DataTable({
-                              "responsive": true,
-                              "autoWidth": true,
-                              "columnDefs": [{
-                                    "targets": 'no-sort',
-                                    "orderable": false,
-                                    "order": []
-                              }],
-                              buttons: [
-                                    'copy', 'excel', 'pdf', 'csv', 'colvis'
-                              ]
-                        }).buttons().container().appendTo('#userTable_wrapperButton');
-                  });
-            </script>
+            <script src="{{ asset('dashboards/js/user.js') }}"></script>
       @endsection
 
 </x-dashboard.layouts>

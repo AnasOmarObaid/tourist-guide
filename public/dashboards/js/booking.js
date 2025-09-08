@@ -48,17 +48,21 @@ $(document).ready(function () {
 
   // Events
   $("#bookingSearch").on("input", filterBookings);
+
   $(document).on("change", 'input[name="bookingStatusFilter"]', filterBookings);
+
   $("#resetBookingFilters").on("click", function () {
     $("#bookingSearch").val("");
     $("#statusAllBooking").prop("checked", true).trigger("change");
     filterBookings();
   });
+
   $(document).on("click", "#clearBookingFiltersBtn", function () {
     $("#bookingSearch").val("");
     $("#statusAllBooking").prop("checked", true).trigger("change");
     filterBookings();
   });
+
   $(document).on("click", "#bookingActiveFilters .chip-clear", function () {
     var type = $(this).data("chip");
     if (type === "search") {

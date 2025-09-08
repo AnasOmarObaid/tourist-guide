@@ -44,14 +44,14 @@ class UserController extends Controller
             $data = $request->validated();
 
             // get current time now to store email verified at field, to store in database
-            if ($request->has('email_verified_at'))
+            if (request()->has('email_verified_at'))
                 $data['email_verified_at'] = now()->toDateTimeString();
 
             // create user
             $user = User::create($data);
 
             // check if there is image
-            if ($request->hasFile('image'))
+            if (request()->hasFile('image'))
                 $image->store($request, $user, 'users');
 
             return redirect()->back()->with('success', "Create User Successfully");
@@ -65,7 +65,47 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //return view('dashboard.user.show', compact('user'));
+        $user->load([
+            'tickets.event.city',
+            'tickets.order',
+            'bookings.hotel.city',
+            'bookings.order',
+        ]);
+
+        $tickets = $user->tickets->map(function ($t) {
+            return [
+                'order_number' => $t->order?->order_number,
+                'total_price' => (float) ($t->order?->total_price ?? 0),
+                'status' => $t->status,
+                'barcode' => $t->barcode,
+                'formatted_created_at' => $t->formatted_created_at,
+                'event' => [
+                    'title' => $t->event?->title,
+                    'image_url' => $t->event?->image_url,
+                    'city' => $t->event?->city?->name,
+                ],
+            ];
+        })->values();
+
+        $bookings = $user->bookings->map(function ($b) {
+            return [
+                'order_number' => $b->order?->order_number,
+                'total_price' => (float) ($b->order?->total_price ?? 0),
+                'status' => $b->status,
+                'formatted_check_in' => $b->formatted_check_in,
+                'formatted_check_out' => $b->formatted_check_out,
+                'hotel' => [
+                    'name' => $b->hotel?->name,
+                    'cover_url' => $b->hotel?->cover_url,
+                    'city' => $b->hotel?->city?->name,
+                ],
+            ];
+        })->values();
+
+        return response()->json([
+            'tickets' => $tickets,
+            'bookings' => $bookings,
+        ]);
     }
 
     /**
@@ -88,13 +128,13 @@ class UserController extends Controller
             $data = $request->validated();
 
             // get current time now to store email verified at field, to store in database
-            $data['email_verified_at'] = $request->has('email_verified_at') ? now()->toDateTimeString() : null;
+            $data['email_verified_at'] = request()->has('email_verified_at') ? now()->toDateTimeString() : null;
 
             // update user
             $user->update($data);
 
             // check if there is image or not
-            if($request->hasFile('image'))
+            if(request()->hasFile('image'))
                 $image->update($request, $user, 'users');
 
             // return redirect route

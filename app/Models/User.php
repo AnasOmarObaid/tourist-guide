@@ -9,9 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Str;
 
 class User extends Authenticatable
+
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
@@ -85,6 +87,7 @@ class User extends Authenticatable
         return $this->hasImage() ? 'storage/'. $this->image?->path : 'https://placehold.co/600x400/00695c/FFF/?font=raleway&text=' .  $initials;
     }
 
+
     /**
      * scopeIsAdmin
      *
@@ -95,5 +98,49 @@ class User extends Authenticatable
     public function scopeIsAdmin(mixed $query, bool $value): mixed
     {
         return $query->where('is_admin', $value);
+    }
+
+    /**
+     * orders (direct)
+     *
+     * @return HasMany
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * tickets via orders (only Event orders)
+     *
+     * @return HasManyThrough
+     */
+    public function tickets(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Ticket::class,
+            Order::class,
+            'user_id',   // Foreign key on orders table...
+            'order_id',  // Foreign key on tickets table...
+            'id',        // Local key on users table...
+            'id'         // Local key on orders table...
+        )->where('orders.orderable_type', Event::class);
+    }
+
+    /**
+     * bookings via orders (only Hotel orders)
+     *
+     * @return HasManyThrough
+     */
+    public function bookings(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Booking::class,
+            Order::class,
+            'user_id',   // Foreign key on orders table...
+            'order_id',  // Foreign key on bookings table...
+            'id',        // Local key on users table...
+            'id'         // Local key on orders table...
+        )->where('orders.orderable_type', Hotel::class);
     }
 }
