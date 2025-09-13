@@ -38,7 +38,6 @@
                                           if ($selectedMin < $priceMin) $selectedMin = $priceMin;
                                           if ($selectedMax > $priceMax) $selectedMax = $priceMax;
                                           if ($selectedMin > $selectedMax) { $tmp = $selectedMin; $selectedMin = $selectedMax; $selectedMax = $tmp; }
-                                          $selectedCities = collect(request('city_ids', []))->map(fn($v) => (int) $v)->toArray();
                                           $selectedStatuses = collect(request('statuses', []))->map(fn($v) => (string) $v)->toArray();
                                           $selectedServices = collect(request('service_ids', []))->map(fn($v) => (int) $v)->toArray();
                                     @endphp
@@ -50,14 +49,6 @@
                                                       <input type="text" name="q" class="form-control" placeholder="Search hotels by name, owner, or venue..." value="{{ request('q') }}">
                                                 </div>
 
-                                                <div class="col-md-4">
-                                                      <label class="form-label">Cities</label>
-                                                      <select name="city_ids[]" id="city_id" class="form-select" multiple>
-                                                            @foreach ($cities as $city)
-                                                                  <option value="{{ $city->id }}" {{ in_array($city->id, $selectedCities) ? 'selected' : '' }}>{{ $city->name }}</option>
-                                                            @endforeach
-                                                      </select>
-                                                </div>
 
                                                 <div class="col-md-4">
                                                       <label class="form-label">Status</label>
@@ -85,6 +76,17 @@
                                                       <label class="form-label">Date to</label>
                                                       <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request('date_to') ? \Carbon\Carbon::parse(request('date_to'))->toDateString() : '' }}">
                                                 </div>
+
+                                                <div class="col-md-2">
+                                                      <label class="form-label">City</label>
+                                                      <select name="city_id" class="form-select" id="city_id">
+                                                            <option value="">Any</option>
+                                                            @foreach ($cities as $city)
+                                                                  <option value="{{ $city->id }}" {{ request('city_id') == $city->id ? 'selected' : '' }}>{{ $city->name }}</option>
+                                                            @endforeach
+                                                      </select>
+                                                </div>
+
 
                                                 <div class="col-12">
                                                       <div class="p-2 border rounded">

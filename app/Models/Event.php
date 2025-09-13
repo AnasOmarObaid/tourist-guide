@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
@@ -165,7 +166,7 @@ class Event extends Model
      *
      * @return HasManyThrough
      */
-    public function tickets() : HasManyThrough
+    public function tickets(): HasManyThrough
     {
         return $this->hasManyThrough(
             Ticket::class,
@@ -175,6 +176,16 @@ class Event extends Model
             'id',
             'id'
         )->where('orders.orderable_type', Event::class);
+    }
+
+    /**
+     * favorites
+     *
+     * @return MorphMany
+     */
+    public function favorites(): MorphMany
+    {
+        return $this->morphMany(Favorite::class, 'favoritable');
     }
 
     /**
@@ -188,7 +199,7 @@ class Event extends Model
             ->with('user')
             ->get()
             ->filter(fn($ticket) => $ticket->user !== null)
-            ->map(fn($ticket) => $ticket->user->getImagePath())
+            ->map(fn($ticket) => asset($ticket->user->getImagePath()))
             ->unique()
             ->values()
             ->toArray();
@@ -235,7 +246,8 @@ class Event extends Model
             ->filter()
             ->unique()
             ->values();
-        $floor = 1; $ceil = 9999;
+        $floor = 1;
+        $ceil = 9999;
         $hasMin = ($f->get('price_min') !== null && $f->get('price_min') !== '');
         $hasMax = ($f->get('price_max') !== null && $f->get('price_max') !== '');
         $startFrom = $f->get('start_at_from');
@@ -252,8 +264,12 @@ class Event extends Model
             })
             ->when($statusInput !== null && $statusInput !== '', function ($qb) use ($statusInput) {
                 $value = null;
-                if ($statusInput === '0' || $statusInput === 0 || $statusInput === false) { $value = 0; }
-                if ($statusInput === '1' || $statusInput === 1 || $statusInput === true) { $value = 1; }
+                if ($statusInput === '0' || $statusInput === 0 || $statusInput === false) {
+                    $value = 0;
+                }
+                if ($statusInput === '1' || $statusInput === 1 || $statusInput === true) {
+                    $value = 1;
+                }
                 if ($value !== null) {
                     $qb->where('status', $value);
                 }
@@ -266,7 +282,9 @@ class Event extends Model
             ->when($hasMin || $hasMax, function ($qb) use ($f, $floor, $ceil, $hasMin, $hasMax) {
                 $min = $hasMin ? max($floor, (int) $f->get('price_min')) : $floor;
                 $max = $hasMax ? min($ceil, (int) $f->get('price_max')) : $ceil;
-                if ($min > $max) { [$min, $max] = [$max, $min]; }
+                if ($min > $max) {
+                    [$min, $max] = [$max, $min];
+                }
                 // Only apply filter if values are different from defaults
                 if ($min > $floor || $max < $ceil) {
                     $qb->whereBetween('price', [$min, $max]);
@@ -290,6 +308,61 @@ class Event extends Model
             ->when(!$endFrom && $endTo, function ($qb) use ($endTo) {
                 $qb->whereDate('end_at', '<=', $endTo);
             });
+    }
+
+    /**
+     * Common eager-loads for displaying events in API responses.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return mixed
+     */
+    public function scopeDisplay($query)
+    {
+        return $query->with(['city', 'image', 'favorites', 'tickets.user']);
+    }
+
+    /**
+     * Scope for upcoming events (start_at in the future).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Carbon\Carbon|string|null  $now
+     * @return mixed
+     */
+    public function scopeUpcoming($query, $now = null)
+    {
+        $now = $now ? Carbon::parse($now) : now();
+        return $query->where('start_at', '>', $now);
+    }
+
+    /**
+     * Scope for ongoing events (started, and not yet ended or no end).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Carbon\Carbon|string|null  $now
+     * @return mixed
+     */
+    public function scopeOngoing($query, $now = null)
+    {
+        $now = $now ? Carbon::parse($now) : now();
+        return $query->where('start_at', '<=', $now)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('end_at')
+                    ->orWhere('end_at', '>=', $now);
+            });
+    }
+
+    /**
+     * Scope for expired events (ended in the past).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Carbon\Carbon|string|null  $now
+     * @return mixed
+     */
+    public function scopeExpired($query, $now = null)
+    {
+        $now = $now ? Carbon::parse($now) : now();
+        return $query->whereNotNull('end_at')
+            ->where('end_at', '<', $now);
     }
 
     /**
@@ -322,7 +395,6 @@ class Event extends Model
                 // at last delete the order
                 $order?->delete();
             }
-
         });
     }
 }

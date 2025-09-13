@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserCollection;
 use App\Services\AuthService;
 use App\Traits\ResponseTrait;
 use App\Traits\RequestRulesTrait;
@@ -38,7 +39,7 @@ class ApiAuthController extends Controller
             $validator = $this->apiValidationHandel($request, $this->loginRules());
 
             if ($validator)
-                return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors(), 422);
+                return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors()->toArray(), 422);
 
             // attempt to login
             $credentials = $request->only('email', 'password');
@@ -53,9 +54,16 @@ class ApiAuthController extends Controller
             // delete old tokens (optional, if we want only 1 session per user)
             $user->tokens()->delete();
 
+            // make token for this user
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            return $this->successResponse('User login successfully', ['token' => $token, 'user' => $user], 200);
+            // make collection for user
+            $data = [
+                'token' => $token,
+                'user' => UserCollection::make($user)->resolve()
+            ];
+
+            return $this->successResponse('User login successfully', $data, 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e, 400);
         }
@@ -75,7 +83,7 @@ class ApiAuthController extends Controller
             $validator = $this->apiValidationHandel($request, $this->registerRules());
 
             if ($validator)
-                return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors(), 422);
+                return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors()->toArray(), 422);
 
             // register the user
             $credentials = $request->only('full_name', 'email', 'password');
@@ -88,7 +96,13 @@ class ApiAuthController extends Controller
             // create token for the user
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            return $this->successResponse('User registered successfully', ['token' => $token, 'user' => $user], 201);
+            // make collection for user
+            $data = [
+                'token' => $token,
+                'user' => UserCollection::make($user)->resolve()
+            ];
+
+            return $this->successResponse('User registered successfully', $data, 201);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e, 400);
         }
@@ -107,7 +121,7 @@ class ApiAuthController extends Controller
             $validator = $this->apiValidationHandel($request, $this->verifyEmailRules());
 
             if ($validator)
-                return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors(), 422);
+                return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors()->toArray(), 422);
 
             // call verifyEmail
             $is_verified = $this->auth_service->verifyEmail(Auth::guard('sanctum')->user(), $request);

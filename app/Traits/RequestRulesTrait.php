@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Models\Event;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
@@ -10,6 +11,24 @@ use Illuminate\Validation\Validator as ValidatorResponse;
 
 trait RequestRulesTrait
 {
+
+    /**
+     * apiValidationHandel
+     *
+     * @param  mixed $request
+     * @param  mixed $rules
+     * @return ValidatorResponse|null
+     */
+    public function apiValidationHandel(Request $request, array $rules): ValidatorResponse|null
+    {
+        // make validation
+        $validator = Validator::make($request->all(), $rules);
+
+        // return validated the data
+        return $validator->fails() ? $validator : null;
+    }
+
+
     /**
      * loginRules
      *
@@ -69,23 +88,6 @@ trait RequestRulesTrait
             'password' => ['required', Rules\Password::defaults(), 'confirmed'],
         ];
     }
-
-     /**
-     * apiValidationHandel
-     *
-     * @param  mixed $request
-     * @param  mixed $rules
-     * @return ValidatorResponse|null
-     */
-    public function apiValidationHandel(Request $request, array $rules): ValidatorResponse|null
-    {
-        // make validation
-        $validator = Validator::make($request->all(), $rules);
-
-        // return validated the data
-        return $validator->fails() ? $validator : null;
-    }
-
 
     /**
      * createUserRules
@@ -259,4 +261,71 @@ trait RequestRulesTrait
             'services.*' => ['exists:services,id'],
         ];
     }
+
+    /**
+     * updateProfileRules
+     *
+     * @return array
+     */
+    public function updateProfileRules() : array
+    {
+        return [
+            'full_name' => ['required', 'string', 'min:2', 'max:100'],
+            'about_me'  => ['required', 'string', 'min:2','max:500'],
+            'image'     => 'nullable|image|mimes:jpg,png,jpeg|max:4096',
+        ];
+    }
+
+    /**
+     * updateFavoriteRules
+     *
+     * @return array
+     */
+    public function updateFavoriteRules() : array
+    {
+        // check if there is favoritable_type
+        $type = (string) request()->input('favoritable_type', ''); // App/Models/Event or App/Models/Hotel
+
+        if(!$type)
+            return ['favoritable_type' => ['required']];
+
+        // Map input to actual tables
+        $table = in_array($type, [Event::class, 'event', 'events']) ? 'event' : 'hotel';
+
+        if(!$table)
+            return ['favoritable_type' => Rule::in(['App\Models\Event', 'App\Models\Hotel'])];
+
+        return [
+            'favoritable_type' => ['required', 'string', Rule::in(['App\Models\Event', 'App\Models\Hotel'])],
+            'favoritable_id' => ['required', 'integer', 'exists:'.$table.'s,id'],
+        ];
+    }
+
+     /**
+      * storeOrderRules
+      *
+      * @return array
+      */
+     public function storeOrderRules() : array
+    {
+        // check if there is orderable_type
+        $type = (string) request()->input('orderable_type', ''); // App/Models/Event or App/Models/Hotel
+
+        if(!$type)
+            return ['orderable_type' => ['required']];
+
+        // Map input to actual tables
+        $table = in_array($type, [Event::class, 'event', 'events']) ? 'event' : 'hotel';
+
+        if(!$table)
+            return ['orderable_type' => Rule::in(['App\Models\Event', 'App\Models\Hotel'])];
+
+        return [
+            'orderable_type' => ['required', 'string', Rule::in(['App\Models\Event', 'App\Models\Hotel'])],
+            'orderable_id' => ['required', 'integer', 'exists:'.$table.'s,id'],
+            'total_price' => ['required', 'numeric', 'min:0'],
+        ];
+    }
+
+
 }

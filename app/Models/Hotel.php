@@ -42,7 +42,8 @@ class Hotel extends Model
     protected $appends = [
         'cover_url',
         'formatted_created_at',
-        'attendees_images'
+        'attendees_images',
+        'images_room_url'
     ];
 
     /**
@@ -104,6 +105,16 @@ class Hotel extends Model
     }
 
     /**
+     * favorites
+     *
+     * @return MorphMany
+     */
+    public function favorites(): MorphMany
+    {
+        return $this->morphMany(Favorite::class, 'favoritable');
+    }
+
+    /**
      * orders
      *
      * @return MorphMany
@@ -146,6 +157,22 @@ class Hotel extends Model
     }
 
     /**
+     * getAttendeesImagesAttribute
+     *
+     * @return array
+     */
+    public function getImagesRoomUrlAttribute(): array
+    {
+        return $this->images()
+            ->get()
+            ->filter(fn($image) => $image->path !== null)
+            ->map(fn($image) => asset('storage/'. $image->path))
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    /**
      * hasCover
      *
      * @return bool
@@ -175,6 +202,8 @@ class Hotel extends Model
         return $this->hasCover() ? 'storage/' . $this->cover : 'https://placehold.co/600x400/';
     }
 
+
+
     /**
      * A single filtering scope using when()
      * Keys: q, city_ids[], service_ids[], statuses[], price_min, price_max
@@ -185,7 +214,7 @@ class Hotel extends Model
         $f = collect($filters);
 
         $q = trim((string) ($f->get('q') ?? ''));
-        $cityIds = collect($f->get('city_ids', []))->map(fn($v) => (int) $v)->filter()->values()->all();
+        $cityId = $f->get('city_id');
         $serviceIds = collect($f->get('service_ids', []))->map(fn($v) => (int) $v)->filter()->values()->all();
         $statuses = collect($f->get('statuses', []))
             ->map(function ($v) { return ($v === '1' || $v === 1 || $v === true || $v === 'true') ? 1 : (($v === '0' || $v === 0 || $v === false || $v === 'false') ? 0 : null); })
@@ -206,8 +235,8 @@ class Hotel extends Model
                        ->orWhere('venue', 'like', "%{$q}%");
                 });
             })
-            ->when(!empty($cityIds), function ($qb) use ($cityIds) {
-                $qb->whereIn('city_id', $cityIds);
+            ->when($cityId !== null && $cityId !== '', function ($qb) use ($cityId) {
+                $qb->where('city_id', $cityId);
             })
             ->when(!empty($serviceIds), function ($qb) use ($serviceIds) {
                 $qb->whereHas('services', function ($qs) use ($serviceIds) {

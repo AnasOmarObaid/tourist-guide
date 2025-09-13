@@ -121,6 +121,32 @@ A comprehensive Laravel-based Tourist Guide and Travel Booking Platform that rev
 
 ## 📚 API Documentation
 
+### API v1 Summary (2025-09) — Ready for Deploy
+
+- Status: Completed and ready for deployment
+- Key highlights:
+  - Event model query scopes for consistent API usage:
+    - display(): eager loads city, image, favorites, tickets.user
+    - upcoming(): start_at > now
+    - ongoing(): start_at <= now and (end_at is null or >= now)
+    - expired(): end_at < now
+  - Home API: GET /api/v1/home/
+    - Returns three sections: upcoming, ongoing, expired
+    - Uses EventShortCollection and computes is_favorite via relationships
+    - Handles empty sections gracefully by returning []
+  - Favorites API: POST /api/v1/favorite/update
+    - Validates favoritable_type (Event|Hotel) and favoritable_id dynamically
+    - Toggles via user relationships (favoriteEvents, favoriteHotels) without direct Favorite model manipulation
+  - Profile API: GET/POST /api/v1/profile
+    - Show and update profile using ProfileService and RequestRulesTrait
+  - Orders (User) API: showUserOrder (controller implemented)
+    - Events grouped into upcoming and past using Event scopes
+    - Hotels grouped into current (still checked-in) and past using Booking scopes current() and past()
+    - Deduplicates hotels per section by hotel id to avoid repeats (e.g., unique by $booking->hotel->id)
+
+Postman Docs
+- Profile: docs/postman/Profile.md
+
 ### Authentication Endpoints
 ```
 POST /api/register        - User registration

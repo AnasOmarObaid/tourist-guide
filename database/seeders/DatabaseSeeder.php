@@ -30,7 +30,9 @@ class DatabaseSeeder extends Seeder
             EventOrderSeeder::class,
             HotelTagSeeder::class,
             HotelServiceSeeder::class,
-            HotelOrderSeeder::class
+            HotelOrderSeeder::class,
+
+            FavoriteSeeder::class,
         ]);
 
         $this->command->line('');

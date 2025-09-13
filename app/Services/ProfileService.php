@@ -30,7 +30,6 @@ class ProfileService
      */
     public function updateProfile(User $user, array $credentials, Request $request): User
     {
-
         // Update user basic information (excluding password and is_admin)
         $credentials = collect($credentials)->toArray();
 

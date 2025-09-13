@@ -34,7 +34,7 @@ class PasswordResetController extends Controller
             $validator = $this->apiValidationHandel($request, $this->sendPasswordResetCodeRules());
 
             if ($validator)
-                return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors(), 422);
+                return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors()->toArray(), 422);
 
             // check if there is user
             $user = $this->reset_password_service->thereIsUser($request);
@@ -64,7 +64,7 @@ class PasswordResetController extends Controller
         $validator = $this->apiValidationHandel($request, $this->passwordResetRules());
 
         if ($validator)
-            return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors(), 422);
+            return $this->errorResponse('The request cannot be fulfilled due to bad syntax.', $validator->errors()->toArray(), 422);
 
         // reset the password
         $is_reset = $this->reset_password_service->resetPassword($request);

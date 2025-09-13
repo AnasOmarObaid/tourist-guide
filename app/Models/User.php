@@ -4,12 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Str;
 
 class User extends Authenticatable
@@ -70,7 +72,8 @@ class User extends Authenticatable
      *
      * @return mixed
      */
-    public function hasImage() : mixed {
+    public function hasImage(): mixed
+    {
 
         return $this->image?->path ? true : false;
     }
@@ -80,11 +83,12 @@ class User extends Authenticatable
      *
      * @return string
      */
-    public function getImagePath() : string {
+    public function getImagePath(): string
+    {
 
         // get the first Letters from full name -- Anas Omar ==> AO
         $initials = Str::of($this->full_name)->explode(' ')->map(fn($part) => $part[0])->join('');
-        return $this->hasImage() ? 'storage/'. $this->image?->path : 'https://placehold.co/600x400/00695c/FFF/?font=raleway&text=' .  $initials;
+        return $this->hasImage() ? 'storage/' . $this->image?->path : 'https://placehold.co/600x400/00695c/FFF/?font=raleway&text=' .  $initials;
     }
 
 
@@ -109,6 +113,50 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class);
     }
+
+    /**
+     * favorites
+     *
+     * @return HasMany
+     */
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    /**
+     * favoriteHotels
+     *
+     * @return MorphToMany
+     */
+    public function favoriteHotels(): MorphToMany
+    {
+        return $this->morphedByMany(
+            Hotel::class,
+            'favoritable',
+            'favorites',
+            'user_id',
+            'favoritable_id'
+        )->distinct();
+    }
+
+
+    /**
+     * favoriteEvents
+     *
+     * @return MorphToMany
+     */
+    public function favoriteEvents(): MorphToMany
+    {
+        return $this->morphedByMany(
+            Event::class,
+            'favoritable',
+            'favorites',
+            'user_id',
+            'favoritable_id'
+        )->distinct();
+    }
+
 
     /**
      * tickets via orders (only Event orders)
@@ -141,6 +189,39 @@ class User extends Authenticatable
             'order_id',  // Foreign key on bookings table...
             'id',        // Local key on users table...
             'id'         // Local key on orders table...
-        )->where('orders.orderable_type', Hotel::class);
+        )
+        ->where('orders.orderable_type', Hotel::class);
+    }
+
+    /**
+     * Events ordered by the user (via orders pivot)
+     *
+     * @return MorphToMany
+     */
+    public function orderedEvents(): MorphToMany
+    {
+        return $this->morphedByMany(
+            Event::class,
+            'orderable',
+            'orders',
+            'user_id',       // Foreign key on orders table referencing users
+            'orderable_id'   // Foreign key on orders table referencing events
+        )->distinct();
+    }
+
+    /**
+     * Hotels ordered by the user (via orders pivot)
+     *
+     * @return MorphToMany
+     */
+    public function orderedHotels(): MorphToMany
+    {
+        return $this->morphedByMany(
+            Hotel::class,
+            'orderable',
+            'orders',
+            'user_id',       // Foreign key on orders table referencing users
+            'orderable_id'   // Foreign key on orders table referencing hotels
+        )->distinct();
     }
 }

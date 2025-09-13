@@ -22,17 +22,16 @@ class OrderFactory extends Factory
      */
     public function definition(): array
     {
-        $event = Event::inRandomOrder()->first();
-        $hotel = Hotel::inRandomOrder()->first();
         $user  = User::inRandomOrder()->first();
 
-        $total = $event->price;
+        $orderableType = $this->faker->randomElement([Event::class, Hotel::class]);
+        $orderableId = $orderableType::inRandomOrder()->first()->id;
 
         return [
             'user_id'        => $user->id,
-            'orderable_id'   => $this->faker->randomElement([$event->id, $hotel->id]),
-            'orderable_type' => $this->faker->randomElement([Event::class, Hotel::class]),
-            'total_price'    => $total,
+            'orderable_type' => $orderableType,
+            'orderable_id'   => $orderableId,
+            'total_price'    =>$this->faker->randomFloat(2, 50, 500),
             'status'         => $this->faker->randomElement(['pending', 'paid', 'canceled']),
         ];
     }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('address')->nullable();
             $table->string('email')->unique();
+            $table->string('about_me')->nullable()->default('Enjoy your favorite dishe and a lovely your friends and family and have a great time. Food from local food trucks will be available for purchase');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->boolean('is_admin')->default(false);

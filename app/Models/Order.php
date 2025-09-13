@@ -27,6 +27,25 @@ class Order extends Model
     ];
 
     /**
+     * The attributes that are append to collection
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'formatted_created_at',
+    ];
+
+    /**
+     * getFormattedCreatedAtAttribute
+     *
+     * @return string
+     */
+    public function getFormattedCreatedAtAttribute(): string
+    {
+        return $this->created_at->format('jS M');
+    }
+
+    /**
      * user
      *
      * @return BelongsTo

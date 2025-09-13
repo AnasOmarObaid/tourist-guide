@@ -23,7 +23,7 @@ class EventFactory extends Factory
             'city_id' => City::inRandomOrder()->first()?->id ?? 1,
             'title' => $this->faker->sentence(5),
             'description' => $this->faker->text,
-            'start_at' => $this->faker->dateTimeBetween('+1 days', '+1 month'),
+            'start_at' => $this->faker->dateTimeBetween('-15 days', '+1 month'),
             'end_at' => $this->faker->dateTimeBetween('+1 month', '+2 months'),
             'venue' => $this->faker->company . " Hall",
             'organizer' => $this->faker->name,
